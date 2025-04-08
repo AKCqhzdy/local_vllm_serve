@@ -6,6 +6,8 @@ environment:
 
 autoDL server
 
+vllm 0.8.2
+
 PyTorch 2.3.0
 
 Python  3.12(ubuntu22.04)
