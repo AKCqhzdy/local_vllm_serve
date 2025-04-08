@@ -52,8 +52,8 @@ async def main():
     payload_json = json.dumps(payload)
 
     command = [
-        "D:\pythonvenv\Scripts\python", #!!
-        "send_request.py",
+        "python",
+        "src/send_request.py",
         API_URL,
         payload_json
     ]
