@@ -18,15 +18,15 @@ CUDA  12.1
 
 Make sure you have installed vllm.  autoDL image is recommended.
 
-``vllm_start_up.py`` is provided to quickly start vllm serve on the server.  (Need to modify MODEL_PATH and MODEL_NAME) 
+``vllm_start_up.py`` is provided to quickly start vllm serve on the server.  (Need to modify MODEL_PATH and MODEL_NAME) At present, each service needs to be started separately, and --gpu-memory-utilization need adjust
 
 
 
 ### Nignx reverse proxy
 
-Make sure you have installed Nignx. 
+Make sure you have installed Nignx and start it by ``nignx``. 
 
-Move ``proxy.conf`` from your project to niginx configuration directory（/etc/niginx/con.d）
+Move ``proxy.conf`` from your project to niginx configuration directory（/etc/niginx/con.d）. This way nginx will listen to port 6006 and forward to 6008 and 6009 depending on the selected model. 
 
 
 
