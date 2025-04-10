@@ -1,0 +1,4 @@
+FROM nginx:stable-perl
+
+COPY nginx/proxy.conf /etc/nginx/conf.d/
+CMD ["nginx", "-g", "daemon off;"]

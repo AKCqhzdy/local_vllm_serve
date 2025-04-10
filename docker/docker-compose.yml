@@ -1,0 +1,34 @@
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    depends_on:
+      - llama3.1-1b
+      # - service_b
+    networks:
+      - my_network
+    ports:
+      - "6006:6006"
+
+  llama3.1-1b:
+    build:
+      context: .
+      dockerfile: Dockerfile.Llama3.1-1B
+    expose:
+      - "6008"
+    networks:
+      - my_network
+    volumes:
+      - .\models:/app/models
+
+  # service_b:
+  #   image: vllm_server:latest
+  #   expose:
+  #     - "6009"
+  #   networks:
+  #     - my_network
+
+networks:
+  my_network:
+    driver: bridge
