@@ -1,5 +1,9 @@
 ## How to use
 
+### use docker
+start up docker-compose under the docker directory
+
+
 ### Start multiple vllm servers
 
 environment: 
