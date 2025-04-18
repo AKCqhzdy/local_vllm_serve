@@ -1,0 +1,15 @@
+FROM vllm/vllm-openai:v0.8.3
+
+WORKDIR /app 
+
+COPY vllm_start/vllm_start_up.py vllm_start_up.py
+
+# ENV HF_ENDPOINT=https://hf-mirror.com
+# RUN huggingface-cli download --resume-download yang31210999/Llama3.1-1B-Neo-BAAI-1000k --local-dir /models/Llama3.1-1B
+
+RUN echo '[model]' >> conf.toml && \
+    echo 'MODEL_NAME = "Llama3.1-1B"' >> conf.toml && \
+    echo 'PORT = 6008' >> conf.toml
+
+RUN pip install toml
+ENTRYPOINT ["python3", "-u", "vllm_start_up.py"]
