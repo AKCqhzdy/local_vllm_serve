@@ -22,6 +22,16 @@ services:
     volumes:
       - .\models:/app/models
 
+  llama3.1-1b-benchmark:
+    build:
+      context: .
+      dockerfile: Dockerfile.Llama3.1-1B-benchmark
+    expose:
+      - "6018"
+    networks:
+      - my_network
+    volumes:
+      - .\models:/app/models
   # service_b:
   #   image: vllm_server:latest
   #   expose:
