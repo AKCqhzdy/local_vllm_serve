@@ -31,12 +31,12 @@ def create_payload(entry_point, model_name, prompt, expect_output_len):
         "temperature": 1,
         "repetition_penalty": 1,
         "logprobs": False,
-        "echo": True,
+        "echo": False,
         "min_p": 0.95,
         "presence_penalty": 1,
         "frequency_penalty": 1,
     }
-    return payload
+    return json.dumps(payload)
 
 
 
@@ -48,8 +48,7 @@ async def main():
     PROMPT = "print abcde...."
     EXPECT_OUTPUT_LEN = 100
 
-    payload = create_payload(ENTRY_POINT, MODEL_NAME, PROMPT, EXPECT_OUTPUT_LEN)
-    payload_json = json.dumps(payload)
+    payload_json = create_payload(ENTRY_POINT, MODEL_NAME, PROMPT, EXPECT_OUTPUT_LEN)
 
     command = [
         "python",
