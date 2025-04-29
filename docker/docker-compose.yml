@@ -5,39 +5,67 @@ services:
       dockerfile: Dockerfile.nginx
     depends_on:
       - llama3.1-1b
-      # - service_b
+      - llama3.1-8b-instruct
     networks:
       - my_network
     ports:
       - "6006:6006"
+    environment:
+      - discovery.type=single-node
+      - http.host=0.0.0.0
+      - xpack.security.enabled=false
 
   llama3.1-1b:
     build:
       context: .
       dockerfile: Dockerfile.Llama3.1-1B
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
     expose:
       - "6008"
     networks:
       - my_network
     volumes:
-      - .\models:/app/models
+      - ~/zihao/local_vllm_serve/models:/app/models
+      - ~/zihao/local_vllm_serve/datasets:/app/datasets
+    environment:
+      - no_proxy=llama3.1-1b,host.docker.internal,127.0.0.1,localhost,nginx
+    entrypoint:
+      - python3
+    command: -u vllm_start/vllm_start_up.py
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - device_ids: ["${LLAMA31_1b_DEVICE_ID:-0}"]
+              capabilities: ["gpu"]
+              driver: "nvidia"
 
-  llama3.1-1b-benchmark:
+  llama3.1-8b-instruct:
     build:
       context: .
-      dockerfile: Dockerfile.Llama3.1-1B-benchmark
+      dockerfile: Dockerfile.Llama3.1-8B-Instruct
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
     expose:
       - "6018"
     networks:
       - my_network
     volumes:
-      - .\models:/app/models
-  # service_b:
-  #   image: vllm_server:latest
-  #   expose:
-  #     - "6009"
-  #   networks:
-  #     - my_network
+      - ~/zihao/local_vllm_serve/models:/app/models
+      - ~/zihao/local_vllm_serve/datasets:/app/datasets
+    environment:
+      - no_proxy=llama3.1-1b,host.docker.internal,127.0.0.1,localhost,nginx
+    entrypoint:
+      - python3
+    command: -u vllm_start/vllm_start_up.py
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - device_ids: ["${LLAMA31_8b_DEVICE_ID:-1}"]
+              capabilities: ["gpu"]
+              driver: "nvidia"
 
 networks:
   my_network:

@@ -52,12 +52,53 @@ try:
 except ImportError:
     from argparse import ArgumentParser as FlexibleArgumentParser
 
-from benchmark_dataset import (BurstGPTDataset,
+from benchmark_dataset import (BurstGPTDataset, HuggingFaceDataset,
                                RandomDataset, SampleRequest, ShareGPTDataset,
-                               SonnetDataset)
+                               SonnetDataset, VisionArenaDataset)
 from benchmark_utils import convert_to_pytorch_benchmark_format, write_to_json
 
 MILLISECONDS_TO_SECONDS_CONVERSION = 1000
+
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+def plot_length_frequency(lengths: list[int], ltype=""):
+    group_size = 50
+    unique_lengths, counts = np.unique(lengths, return_counts=True)
+    min_length = 0
+    max_length = 4096
+    num_groups = (max_length - min_length + group_size - 1) // group_size
+    groups = [min_length + i * group_size for i in range(num_groups)]
+
+    group_counts = [0] * num_groups
+    for length in lengths:
+        group_index = (length - min_length) // group_size
+        group_counts[group_index] += 1
+
+    plt.figure(figsize=(8, 6))
+    plt.bar(groups, group_counts, width=group_size, align='edge', color='skyblue')
+
+    plt.title(ltype + " Length - Frequency")
+    plt.xlabel(ltype + " Length")
+    plt.ylabel("Frequency")
+
+    plt.xticks(groups)
+
+    plt.xlim(min_length, max_length + group_size)
+
+    plt.grid(axis='y', alpha=0.75)
+
+    plt.tight_layout()
+
+    
+    plt.savefig(f"/root/zihao/test/output/{ltype}_pic_test.jpg")
+    plt.close()
+    # plt.show()
+
+
+
 
 @dataclass
 class BenchmarkMetrics:
@@ -347,6 +388,7 @@ async def benchmark(
     benchmark_start_time = time.perf_counter()
 
     prompt_lengths = [req.prompt_len for req in input_requests]
+    # plot_length_frequency(prompt_lengths,"input")
     tasks: list[asyncio.Task] = []
     async for request in get_request(input_requests, request_rate, burstiness):
         # print(request)
@@ -374,6 +416,7 @@ async def benchmark(
     outputs: list[RequestFuncOutput] = await asyncio.gather(*tasks)
 
     prompt_lengths = [req.output_tokens for req in outputs]
+    # plot_length_frequency(prompt_lengths,"output")
 
     if profile:
         print("Stopping profiler...")
@@ -606,6 +649,23 @@ def main(args: argparse.Namespace):
         # print(input_requests[:5])
         # print(len(input_requests))
         # exit()
+
+    elif args.dataset_name == "hf":
+        # Choose between VisionArenaDataset
+        # and HuggingFaceDataset based on provided parameters.
+        dataset_class = (VisionArenaDataset if args.dataset_path
+                         == VisionArenaDataset.VISION_ARENA_DATASET_PATH
+                         and args.hf_subset is None else HuggingFaceDataset)
+        input_requests = dataset_class(
+            dataset_path=args.dataset_path,
+            dataset_subset=args.hf_subset,
+            dataset_split=args.hf_split,
+        ).sample(
+            num_requests=args.num_prompts,
+            tokenizer=tokenizer,
+            random_seed=args.seed,
+            output_len=args.hf_output_len,
+        )
 
     else:
         # temp = ShareGPTDataset(random_seed=args.seed,

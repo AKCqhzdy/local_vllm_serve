@@ -3,15 +3,15 @@ import json
 import time
 import toml
 
+# vllm serve models/{model_name} --disable-log-requests --gpu-memory-utilization=0.9 --max_model_len=4096 --port={port}
 
-
-def run_benchmark(model_name, dataset_path, num_prompts,port):
+def run_benchmark(model_path, dataset_path, num_prompts,port):
     """运行基准测试."""
     command = [
         "python3",
         "benchmark/benchmark_serving.py",
         "--backend", "openai-chat",
-        "--model", model_name,
+        "--model", model_path,
         "--endpoint", "/v1/chat/completions",
         "--dataset-name", "sharegpt",
         # "--dataset-name", "sonnet",
@@ -35,7 +35,7 @@ def run_benchmark(model_name, dataset_path, num_prompts,port):
 
 if __name__ == "__main__":
     MODEL_NAME = "Llama3.1-1B"
-    DATASET_PATH = "benchmark/ShareGPT_V4.3_unfiltered_cleaned_split.json"
+    DATASET_PATH = "ShareGPT_Vicuna_unfiltered/ShareGPT_V4.3_unfiltered_cleaned_split.json"
     NUM_PROMPTS = 200
     PORT = 6008
 
@@ -43,14 +43,14 @@ if __name__ == "__main__":
         with open("conf.toml", "r") as f:
             config = toml.load(f)
     except FileNotFoundError:
-        print("错误: 找不到 conf.toml 文件")
+        print("error: con not find conf.toml")
         exit(1)
 
-    print(config) 
+    print(config)
     MODEL_NAME = config["model"].get("MODEL_NAME")
     PORT = config["model"].get("PORT")
     if not MODEL_NAME or not PORT:
-        print("错误: 配置文件中缺少 MODEL_NAME 或 PORT")
+        print("error: con not find MODEL_NAME or PORT in config")
         exit(1)
 
-    benchmark_result = run_benchmark(MODEL_NAME, DATASET_PATH, NUM_PROMPTS, PORT)
+    benchmark_result = run_benchmark("models/"+MODEL_NAME, "datasets/"+DATASET_PATH, NUM_PROMPTS, PORT)

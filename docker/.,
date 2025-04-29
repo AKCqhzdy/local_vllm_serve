@@ -17,6 +17,5 @@ RUN echo '[model]' >> conf.toml && \
 
 COPY vllm_start vllm_start
 COPY benchmark benchmark
-
-# ENTRYPOINT ["bash", "-c", "while true; do sleep 1000; done"]
+ENTRYPOINT ["bash", "-c", "while true; do sleep 1000; done"]
 # ENTRYPOINT ["python3", "-u", "vllm_start/vllm_start_up.py"]

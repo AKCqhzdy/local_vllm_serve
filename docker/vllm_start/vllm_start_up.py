@@ -2,18 +2,16 @@ import subprocess
 import time
 import toml
 
-def run_vllm_serve(model_name="Llama3.1-1B", port=6008):
+def run_vllm_serve(model_name, port):
     """启动 vLLM 服务."""
     command = f"\
         vllm serve models/{model_name} \
         --disable-log-requests \
         --gpu-memory-utilization=0.9\
-        --max_model_len=1024 \
+        --max_model_len=4096 \
         --port={port} \
-        --served-model-name {model_name}\
-        --disable-async-output-proc\
-        --device=cpu "
-    print(f"运行命令: {command}")
+        --served-model-name={model_name}"
+    print(f"run command: {command}")
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     while True:
@@ -26,31 +24,31 @@ def run_vllm_serve(model_name="Llama3.1-1B", port=6008):
     process.wait()
 
     if process.returncode != 0:
-        print(f"vLLM 服务启动失败，退出代码: {process.returncode}")
+        print(f"fail to start vLLM serve, exit code: {process.returncode}")
         print(process.stderr.read().decode('utf-8'))
         return False
     return True
 
 
 if __name__ == "__main__":
-    
+
     try:
         with open("conf.toml", "r") as f:
             config = toml.load(f)
     except FileNotFoundError:
-        print("错误: 找不到 conf.toml 文件")
+        print("error: can not find conf.toml")
         exit(1)
 
-    print(config) 
+    print(config)
     MODEL_NAME = config["model"].get("MODEL_NAME")
     PORT = config["model"].get("PORT")
     if not MODEL_NAME or not PORT:
-        print("错误: 配置文件中缺少 MODEL_NAME 或 PORT")
+        print("error: can not MODEL_NAME or PORT in config")
         exit(1)
-        
+
     if not run_vllm_serve(MODEL_NAME,PORT):
-        print("vLLM 服务启动失败，程序退出")
+        print("The vLLM service failed to start and the program exited")
         exit()
     time.sleep(10)
     print("start up success!")
-    
+

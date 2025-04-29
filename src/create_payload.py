@@ -41,7 +41,7 @@ def create_payload(entry_point, model_name, prompt, expect_output_len):
 
 
 async def main():
-    
+
     API_URL = "http://127.0.0.1:6006"
     ENTRY_POINT = "/v1/chat/completions"
     MODEL_NAME = "Llama3.1-1B"
@@ -51,7 +51,7 @@ async def main():
     payload_json = create_payload(ENTRY_POINT, MODEL_NAME, PROMPT, EXPECT_OUTPUT_LEN)
 
     command = [
-        "python",
+        sys.executable,
         "src/send_request.py",
         API_URL,
         payload_json
@@ -70,7 +70,7 @@ async def main():
                 break
 
             line = line.decode().strip()
-            # logging.info(f"Received line: {line}") 
+            # logging.info(f"Received line: {line}")
             if line:
                 try:
                     data = json.loads(json.loads(line))
