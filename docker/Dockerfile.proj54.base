@@ -1,0 +1,14 @@
+FROM vllm/vllm-openai:v0.8.3
+
+WORKDIR /app
+
+# Proxy (required by proj54)
+ENV http_proxy=http://proxy.cse.cuhk.edu.hk:8000 \
+    https_proxy=http://proxy.cse.cuhk.edu.hk:8000
+
+# Install dependencies
+RUN pip install toml pandas datasets matplotlib
+
+COPY vllm_start vllm_start
+COPY benchmark benchmark
+COPY prepare_model.sh prepare_model.sh

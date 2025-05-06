@@ -1,11 +1,12 @@
 import subprocess
 import time
 import toml
+import os
 
 def run_vllm_serve(model_name, port):
-    """启动 vLLM 服务."""
+    """Start vLLM."""
     command = f"\
-        vllm serve models/{model_name} \
+        vllm serve /app/models/{model_name} \
         --disable-log-requests \
         --gpu-memory-utilization=0.9\
         --max_model_len=4096 \
@@ -20,7 +21,7 @@ def run_vllm_serve(model_name, port):
             break
         print(line.decode('utf-8').strip())
 
-    # 等待进程结束
+    # Wait for the process to end
     process.wait()
 
     if process.returncode != 0:
@@ -31,24 +32,21 @@ def run_vllm_serve(model_name, port):
 
 
 if __name__ == "__main__":
-
     try:
         with open("conf.toml", "r") as f:
             config = toml.load(f)
     except FileNotFoundError:
-        print("error: can not find conf.toml")
-        exit(1)
+        raise Exception(f"error: can not find in {os.path.abspath('conf.toml')}")
 
     print(config)
     MODEL_NAME = config["model"].get("MODEL_NAME")
     PORT = config["model"].get("PORT")
     if not MODEL_NAME or not PORT:
-        print("error: can not MODEL_NAME or PORT in config")
-        exit(1)
+        raise Exception("error: can not find MODEL_NAME or PORT in config")
 
     if not run_vllm_serve(MODEL_NAME,PORT):
-        print("The vLLM service failed to start and the program exited")
-        exit()
+        raise Exception("The vLLM service failed to start and the program exited")
+
     time.sleep(10)
     print("start up success!")
 
