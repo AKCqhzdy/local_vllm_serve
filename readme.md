@@ -1,37 +1,29 @@
-## How to use
+## Quick Start 
 
-### use docker
-start up docker-compose under the docker directory
+```bash
+# Run on proj54
+cp .env.example .env
+# Change the environment variables in the .env file to your own, especially the `HUGGING_FACE_HUB_TOKEN`
 
+# Run the script to start the containers
+chmod +x docker/run_proj54.sh
+./docker/run_proj54.sh
 
-### Start multiple vllm servers
+# Send test request
+python src/create_payload.py
+```
 
-environment: 
+## Configuration
 
-autoDL server
-
-vllm 0.8.2
-
-PyTorch 2.3.0
-
-Python  3.12(ubuntu22.04)
-
-CUDA  12.1
-
-
-
-Make sure you have installed vllm.  autoDL image is recommended.
-
-``vllm_start_up.py`` is provided to quickly start vllm serve on the server.  (Need to modify MODEL_PATH and MODEL_NAME) At present, each service needs to be started separately, and --gpu-memory-utilization need adjust
-
-
+### vLLM
+#### Description
+`docker/Dockerfile.base` is the base image for vLLM with some common packages installed. Besides, `docker/prepare_model.sh` is a script that prepares the model for vLLM. It creates a ``conf.toml`` file in the model directory and downloads the model from the HuggingFace Hub. This script will be called when you run `docker-compose up` in `docker/docker-compose.yml`. We use .env file to pass the environment variables to the container. Please change the environment variables in the .env file to your own. For quick start, you can only change the `HUGGING_FACE_HUB_TOKEN` in the to your own.
+#### Network configuration
+If you want to run the vLLM on your own machine, you can change the `docker/docker-compose.yml` file to run the vLLM on your own machine. For example, the `docker/docker-compose_proj54.yml` and `docker/Dockerfile.proj54.base` are the configuration for running the vLLM on our own server.
 
 ### Nignx reverse proxy
 
-Make sure you have installed Nignx and start it by ``nignx``. 
-
-Move ``proxy.conf`` from your project to niginx configuration directory（/etc/niginx/con.d）. This way nginx will listen to port 6006 and forward to 6008 and 6009 depending on the selected model. 
-
+Move ``proxy.conf`` from your project to niginx configuration directory（/etc/niginx/con.d）. This way nginx will listen to port 6006 and forward to 6008 and 6009 depending on the selected model. Do remember to add the config for the new added model config to the ``proxy.conf`` file.
 
 
 ### Send request
@@ -45,3 +37,7 @@ python src/create_payload.py
 ```
 
 Response(openai format) will be displayed
+
+### Benchmark
+
+We also provide a benchmark script to test the performance of the vLLM. The benchmark script is in `benchmark/benchmark.py`. You can run the benchmark script by `python benchmark/benchmark.py`.
